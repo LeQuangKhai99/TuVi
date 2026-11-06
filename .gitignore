@@ -3,7 +3,10 @@ node_modules/
 .vercel/
 .env*
 !.env.example
-dist/
+data/
+*.zst
+__pycache__/
+*.pyc
 *.tsbuildinfo
 .DS_Store
 node_modules

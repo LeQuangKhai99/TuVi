@@ -110,12 +110,10 @@ export default function ChatPanel({ chart }: ChatPanelProps) {
           </motion.div>
         )}
 
-        <AnimatePresence>
+        <div className="space-y-4">
           {messages.map((msg, i) => (
-            <motion.div
-              key={i}
-              initial={{ opacity: 0, y: 8 }}
-              animate={{ opacity: 1, y: 0 }}
+            <div
+              key={`msg-${i}`}
               className={`flex ${msg.role === 'user' ? 'justify-end' : 'justify-start'}`}
             >
               <div
@@ -134,15 +132,15 @@ export default function ChatPanel({ chart }: ChatPanelProps) {
                   <div className="text-[10px] mb-1" style={{ color: 'var(--t-faint)' }}>命理师 ·</div>
                 )}
                 <div className="whitespace-pre-wrap text-xs leading-relaxed">
-                  {msg.content}
+                  <span>{msg.content}</span>
                   {loading && i === messages.length - 1 && msg.role === 'assistant' && (
                     <span className="inline-block w-1.5 h-3 ml-0.5 animate-pulse" style={{ background: 'var(--t-gold)', opacity: 0.6 }} />
                   )}
                 </div>
               </div>
-            </motion.div>
+            </div>
           ))}
-        </AnimatePresence>
+        </div>
       </div>
 
       {/* 预设问题 */}
