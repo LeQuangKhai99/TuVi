@@ -14,7 +14,7 @@ interface RequestPayload {
 export async function POST(req: NextRequest) {
   try {
     const payload: RequestPayload = await req.json();
-    const { chart, messages, topic, lang = 'vi' } = payload;
+    const { chart, messages, topic, lang = 'zh' } = payload;
     const lastUserMsg = messages?.filter(m => m.role === 'user').pop()?.content || '';
 
     // Xác định chủ đề từ client hoặc từ câu hỏi người dùng

@@ -75,7 +75,7 @@ function AiContent({ text, streaming }: { text: string; streaming?: boolean }) {
 
 export default function InsightPanel({ chart, selectedPalace }: InsightPanelProps) {
   const [activeTab, setActiveTab] = useState<string>('overview');
-  const [lang, setLang] = useState<'vi' | 'zh'>('vi');
+  const [lang, setLang] = useState<'vi' | 'zh'>('zh');
   const [tabContents, setTabContents] = useState<Record<string, { vi?: string; zh?: string }>>({});
   const [loading, setLoading] = useState(false);
   const [customQa, setCustomQa] = useState<Record<string, { q: string; a: string }[]>>({});
@@ -274,22 +274,6 @@ export default function InsightPanel({ chart, selectedPalace }: InsightPanelProp
           <div className="flex items-center rounded-lg p-0.5" style={{ background: 'var(--t-surface)', border: '1px solid var(--t-border)' }}>
             <button
               onClick={() => {
-                if (lang !== 'vi') {
-                  setLang('vi');
-                  if (!tabContents[activeTab]?.['vi']) fetchTopicContent(activeTab, 'vi');
-                }
-              }}
-              className="text-[10px] px-2 py-0.5 rounded-md transition-all font-medium"
-              style={{
-                background: lang === 'vi' ? 'rgba(212,168,67,0.22)' : 'transparent',
-                color: lang === 'vi' ? 'var(--t-gold)' : 'var(--t-faint)',
-              }}
-              title="Xem bản dịch Tiếng Việt"
-            >
-              🇻🇳 Tiếng Việt
-            </button>
-            <button
-              onClick={() => {
                 if (lang !== 'zh') {
                   setLang('zh');
                   if (!tabContents[activeTab]?.['zh']) fetchTopicContent(activeTab, 'zh');
@@ -303,6 +287,22 @@ export default function InsightPanel({ chart, selectedPalace }: InsightPanelProp
               title="Xem nguyên văn chữ Hán từ Dataset 《Thiên Kỷ》"
             >
               📜 Nguyên bản Hán
+            </button>
+            <button
+              onClick={() => {
+                if (lang !== 'vi') {
+                  setLang('vi');
+                  if (!tabContents[activeTab]?.['vi']) fetchTopicContent(activeTab, 'vi');
+                }
+              }}
+              className="text-[10px] px-2 py-0.5 rounded-md transition-all font-medium"
+              style={{
+                background: lang === 'vi' ? 'rgba(212,168,67,0.22)' : 'transparent',
+                color: lang === 'vi' ? 'var(--t-gold)' : 'var(--t-faint)',
+              }}
+              title="Xem bản dịch Tiếng Việt"
+            >
+              🇻🇳 Bản dịch Việt
             </button>
           </div>
         </div>
