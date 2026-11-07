@@ -1,0 +1,15 @@
+services:
+  - type: web
+    name: tuvi-master
+    runtime: node
+    plan: free
+    region: singapore
+    buildCommand: npm install --include=dev && npm run build
+    startCommand: npm start
+    envVars:
+      - key: NODE_VERSION
+        value: 20
+      - key: NPM_CONFIG_PRODUCTION
+        value: false
+      - key: NODE_OPTIONS
+        value: --max-old-space-size=450
