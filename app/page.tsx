@@ -42,36 +42,50 @@ function ThemeToggle() {
   const isDark = theme === 'dark';
   return (
     <motion.button
+      type="button"
       onClick={toggle}
-      whileHover={{ scale: 1.05 }}
-      whileTap={{ scale: 0.93 }}
+      whileHover={{ scale: 1.04 }}
+      whileTap={{ scale: 0.95 }}
       aria-label={isDark ? 'Chuyển sang giao diện sáng' : 'Chuyển sang giao diện tối'}
-      className="flex items-center gap-2 px-3 py-1.5 rounded-full border transition-all duration-300"
+      className="inline-flex items-center gap-2 px-2.5 py-1 sm:px-3 sm:py-1.5 rounded-full border cursor-pointer select-none transition-all duration-300"
       style={{
-        borderColor: isDark ? 'rgba(212,168,67,0.35)' : 'rgba(140,100,20,0.3)',
-        background: isDark ? 'rgba(255,255,255,0.06)' : 'rgba(255,252,242,0.9)',
+        borderColor: isDark ? 'rgba(212,168,67,0.35)' : 'rgba(140,100,20,0.25)',
+        background: isDark ? 'rgba(255,255,255,0.06)' : 'rgba(255,252,242,0.95)',
+        boxShadow: isDark ? '0 1px 4px rgba(0,0,0,0.3)' : '0 1px 4px rgba(140,100,20,0.08)',
       }}
     >
       <div
-        className="relative w-9 h-4.5 rounded-full flex-shrink-0"
+        className="relative flex-shrink-0 rounded-full transition-colors duration-300"
         style={{
-          background: isDark ? 'rgba(15,25,50,0.95)' : 'rgba(230,195,80,0.6)',
+          width: '36px',
+          height: '20px',
+          background: isDark ? 'rgba(15,25,50,0.95)' : 'rgba(230,195,80,0.45)',
+          border: `1px solid ${isDark ? 'rgba(212,168,67,0.4)' : 'rgba(180,130,30,0.35)'}`,
+          boxSizing: 'border-box',
         }}
       >
         <motion.div
           animate={{ x: isDark ? 2 : 18 }}
-          transition={{ type: 'spring', stiffness: 400, damping: 28 }}
-          className="absolute top-0.5 w-3.5 h-3.5 rounded-full"
+          transition={{ type: 'spring', stiffness: 500, damping: 30 }}
+          className="absolute rounded-full flex items-center justify-center"
           style={{
+            top: '2px',
+            width: '14px',
+            height: '14px',
             background: isDark
               ? 'linear-gradient(135deg, #d4a843, #f0d070)'
               : 'linear-gradient(135deg, #e89010, #f8d050)',
+            boxShadow: '0 1px 3px rgba(0,0,0,0.3)',
           }}
-        />
+        >
+          <span style={{ fontSize: '8px', lineHeight: 1, userSelect: 'none' }}>
+            {isDark ? '🌙' : '☀️'}
+          </span>
+        </motion.div>
       </div>
       <span
-        className="text-[11px] font-medium tracking-wide select-none"
-        style={{ color: isDark ? 'rgba(212,180,100,0.9)' : 'rgba(110,72,8,0.85)' }}
+        className="text-[11px] font-semibold tracking-wider leading-none"
+        style={{ color: isDark ? 'rgba(212,180,100,0.95)' : 'rgba(110,72,8,0.9)' }}
       >
         {isDark ? 'Tối' : 'Sáng'}
       </span>
