@@ -60,6 +60,7 @@ export default function HemingPage() {
   const [formB, setFormB] = useState<BirthFormState | null>(null);
 
   // ─── AI 合盘分析状态 ─────────────────────────────────────
+  const [lang, setLang] = useState<'zh' | 'vi'>('zh');
   const [analysis, setAnalysis] = useState('');
   const [analyzing, setAnalyzing] = useState(false);
   const [question, setQuestion] = useState('');
@@ -68,6 +69,10 @@ export default function HemingPage() {
   const [apiMissing, setApiMissing] = useState(false);
   const [formError, setFormError] = useState<string | null>(null);
   const analysisRef = useRef<HTMLDivElement>(null);
+
+  if (typeof globalThis !== 'undefined') {
+    (globalThis as unknown as { __heming_lang?: string }).__heming_lang = lang;
+  }
 
   // ─── 起盘（单次调用，返回 chart 给统一流程使用）──────────
   // 开源版不含后端 /api/generate：直接用本仓库的排盘引擎在浏览器里起盘
@@ -84,7 +89,7 @@ export default function HemingPage() {
     !!(f && f.year && f.month && f.day && f.gender && (f.unknownTime || (f.clockHour !== '' && f.clockMinute !== '')));
 
   // ─── 统一入口：起盘 + 合盘分析 ─────────────────────────────
-  const runAnalysis = useCallback(async (q?: string) => {
+  const runAnalysis = useCallback(async (q?: string, targetLang?: 'zh' | 'vi') => {
     setFormError(null);
     if (!isFormReady(formA) || !isFormReady(formB)) {
       setFormError('Vui lòng nhập đầy đủ thông tin ngày sinh của cả hai người');
@@ -108,10 +113,12 @@ export default function HemingPage() {
       setChartA(cA);
       setChartB(cB);
 
+      const activeLang = targetLang || (typeof globalThis !== 'undefined' && (globalThis as unknown as { __heming_lang?: 'zh' | 'vi' }).__heming_lang) || 'zh';
+
       const res = await fetch('/api/heming', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ chartA: cA, chartB: cB, question: q ?? undefined }),
+        body: JSON.stringify({ chartA: cA, chartB: cB, question: q ?? undefined, lang: activeLang }),
       });
       if (res.status === 404) { setApiMissing(true); throw new Error('api-missing'); }
       if (!res.ok || !res.body) throw new Error();
@@ -158,6 +165,17 @@ export default function HemingPage() {
   const labelStyle = {
     fontSize: '10px', letterSpacing: '0.4em', color: 'var(--ac)', opacity: 0.7,
     marginBottom: '16px', display: 'block',
+  };
+
+  const handleLanguageChange = (newLang: 'zh' | 'vi') => {
+    if (newLang === lang) return;
+    setLang(newLang);
+    if (typeof globalThis !== 'undefined') {
+      (globalThis as unknown as { __heming_lang?: string }).__heming_lang = newLang;
+    }
+    if ((chartA || isFormReady(formA)) && (chartB || isFormReady(formB))) {
+      runAnalysis(question || undefined, newLang);
+    }
   };
 
   return (
@@ -233,10 +251,64 @@ export default function HemingPage() {
           flexDirection: 'column',
           justifyContent: (!analysis && !analyzing) ? 'center' : 'flex-start',
         }}>
-          {/* Tiêu đề mục */}
-          <div style={{ display: 'flex', alignItems: 'center', gap: '10px', marginBottom: (analysis || analyzing) ? '20px' : '24px' }}>
-            <span style={{ color: 'var(--ac)', opacity: 0.6 }}>◉</span>
-            <span style={{ fontSize: '11px', letterSpacing: '0.3em', color: 'var(--tx-3)' }}>KẾT QUẢ HỢP BÀN · TƯƠNG HỢP</span>
+          {/* Tiêu đề mục & Lựa chọn ngôn ngữ luận giải */}
+          <div style={{
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'space-between',
+            flexWrap: 'wrap',
+            gap: '12px',
+            marginBottom: (analysis || analyzing) ? '20px' : '24px'
+          }}>
+            <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
+              <span style={{ color: 'var(--ac)', opacity: 0.6 }}>◉</span>
+              <span style={{ fontSize: '11px', letterSpacing: '0.3em', color: 'var(--tx-3)' }}>KẾT QUẢ HỢP BÀN · TƯƠNG HỢP</span>
+            </div>
+
+            <div style={{
+              display: 'flex',
+              alignItems: 'center',
+              background: isDark ? 'rgba(255,255,255,0.06)' : 'rgba(0,0,0,0.04)',
+              border: `1px solid ${isDark ? 'rgba(255,255,255,0.1)' : 'rgba(0,0,0,0.08)'}`,
+              borderRadius: '8px',
+              padding: '2px',
+              gap: '2px',
+            }}>
+              <button
+                type="button"
+                onClick={() => handleLanguageChange('zh')}
+                style={{
+                  fontSize: '11px',
+                  padding: '4px 10px',
+                  borderRadius: '6px',
+                  border: 'none',
+                  cursor: 'pointer',
+                  background: lang === 'zh' ? 'var(--ac)' : 'transparent',
+                  color: lang === 'zh' ? '#fff' : 'var(--tx-3)',
+                  fontWeight: lang === 'zh' ? 600 : 400,
+                  transition: 'all 0.15s ease',
+                }}
+              >
+                📜 Nguyên bản Hán
+              </button>
+              <button
+                type="button"
+                onClick={() => handleLanguageChange('vi')}
+                style={{
+                  fontSize: '11px',
+                  padding: '4px 10px',
+                  borderRadius: '6px',
+                  border: 'none',
+                  cursor: 'pointer',
+                  background: lang === 'vi' ? 'var(--ac)' : 'transparent',
+                  color: lang === 'vi' ? '#fff' : 'var(--tx-3)',
+                  fontWeight: lang === 'vi' ? 600 : 400,
+                  transition: 'all 0.15s ease',
+                }}
+              >
+                🇻🇳 Bản dịch Việt
+              </button>
+            </div>
           </div>
 
           {/* Trạng thái */}
@@ -275,7 +347,7 @@ export default function HemingPage() {
                 border: '2px solid var(--bdr-med)', borderTopColor: 'var(--ac)',
                 borderRadius: '50%', animation: 'spin 0.8s linear infinite',
               }} />
-              Đang đối chiếu hai lá số…
+              {lang === 'vi' ? 'Đang đối chiếu hai lá số…' : '正在对参双方命盘与夫妻福德…'}
             </div>
           )}
 
@@ -294,21 +366,30 @@ export default function HemingPage() {
         {analysis && (
           <div style={{ display: 'flex', flexDirection: 'column', gap: '10px', marginTop: '16px' }}>
             <div style={{ fontSize: '11px', letterSpacing: '0.2em', color: 'var(--tx-3)', marginBottom: '4px' }}>
-              Đặt câu hỏi thêm về kết quả hợp bàn
+              {lang === 'vi' ? 'Đặt câu hỏi thêm về kết quả hợp bàn' : '针对合盘结果深入咨询'}
             </div>
 
             {/* Câu hỏi gợi ý */}
             <div style={{ display: 'flex', gap: '8px', flexWrap: 'wrap' }}>
-              {[
-                'Độ tương hợp tình cảm thế nào?',
-                'Có nên hợp tác làm ăn cùng nhau?',
-                'Hai người kết hôn có hòa thuận không?',
-                'Điểm nào dễ nảy sinh bất đồng nhất?',
-                'Tài lộc có bổ trợ cho nhau không?',
-              ].map(q => (
+              {(lang === 'vi'
+                ? [
+                  'Độ tương hợp tình cảm thế nào?',
+                  'Có nên hợp tác làm ăn cùng nhau?',
+                  'Hai người kết hôn có hòa thuận không?',
+                  'Điểm nào dễ nảy sinh bất đồng nhất?',
+                  'Tài lộc có bổ trợ cho nhau không?',
+                ]
+                : [
+                  '双方感情缘分与默契度如何？',
+                  '彼此适合合伙经商或事业共事吗？',
+                  '二人婚后家庭关系是否和睦顺遂？',
+                  '性格上最容易在何处产生分歧摩擦？',
+                  '双方财气与行运是否互有增益？',
+                ]
+              ).map(q => (
                 <button
                   key={q}
-                  onClick={() => { setQuestion(q); runAnalysis(q); }}
+                  onClick={() => { setQuestion(q); setAnalysis(''); runAnalysis(q); }}
                   disabled={analyzing}
                   style={{
                     fontSize: '12px', padding: '6px 14px',
@@ -333,14 +414,19 @@ export default function HemingPage() {
                 type="text"
                 value={question}
                 onChange={e => setQuestion(e.target.value)}
-                onKeyDown={e => { if (e.key === 'Enter' && !analyzing) runAnalysis(question || undefined); }}
-                placeholder="Hỏi thêm về mối quan hệ giữa hai người..."
+                onKeyDown={e => {
+                  if (e.key === 'Enter' && !analyzing) {
+                    setAnalysis('');
+                    runAnalysis(question || undefined);
+                  }
+                }}
+                placeholder={lang === 'vi' ? "Hỏi thêm về mối quan hệ giữa hai người..." : "输入关于两人关系的进一步咨询..."}
                 disabled={analyzing}
                 className="input-base"
                 style={{ fontSize: '13px', flex: 1 }}
               />
               <button
-                onClick={() => runAnalysis(question || undefined)}
+                onClick={() => { setAnalysis(''); runAnalysis(question || undefined); }}
                 disabled={analyzing}
                 style={{
                   padding: '10px 20px', borderRadius: 'var(--r-sm)', border: 'none',
@@ -351,7 +437,7 @@ export default function HemingPage() {
                   transition: 'all 0.15s', whiteSpace: 'nowrap',
                 }}
               >
-                {analyzing ? 'Đang phân tích…' : 'Gửi câu hỏi'}
+                {analyzing ? (lang === 'vi' ? 'Đang phân tích…' : '正在推演…') : (lang === 'vi' ? 'Gửi câu hỏi' : '发送咨询')}
               </button>
             </div>
           </div>

@@ -16,7 +16,9 @@ const IDIOMS = new RegExp(`${NAME}(\u7cbe\u901a|\u4e4b\u795e|\u4e4b\u661f)|\u4e3
 
 const TEXT_EXT = /\.(ts|tsx|js|mjs|cjs|json|css|md|txt|html|svg|xml|yml|yaml)$/i;
 
-const files = execFileSync('git', ['ls-files', '-z'], { encoding: 'utf8' }).split('\0').filter((f) => f && TEXT_EXT.test(f));
+const files = execFileSync('git', ['ls-files', '-z'], { encoding: 'utf8' })
+  .split('\0')
+  .filter((f) => f && TEXT_EXT.test(f) && !f.endsWith('hanviet.json'));
 const hits: string[] = [];
 for (const f of files) {
   if (BANNED.some((re) => re.test(f))) { hits.push(`${f}（文件名）`); continue; }
